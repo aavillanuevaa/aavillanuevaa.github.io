@@ -12,7 +12,7 @@ const ProjectCard = ({
           <img
             src={imageSrc}
             alt="Project"
-            className="w-32 h-32 object-cover"
+            className="w-32 h-32 object-cover group-hover:scale-105 transition-transform duration-200 rounded-md"
           />
         </div>
         <div className="col-span-5 col-start-5 text">
@@ -24,7 +24,7 @@ const ProjectCard = ({
               className="text-text group-hover:text-lavender inline-flex items-center"
             >
               {projecttitle}
-              <IoIosArrowForward className="ml-1 mt-1 group-hover:translate-x-2 duration-125" />
+              <IoIosArrowForward className="ml-1 mt-1 group-hover:translate-x-2 duration-125 group-hover:scale-115" />
             </a>
           </h1>
           <h2 className="text-sm text-subtext max-w-full">{projectdesc}</h2>
