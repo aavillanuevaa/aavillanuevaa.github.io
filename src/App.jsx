@@ -26,13 +26,30 @@ const App = () => {
       </div>
 
       <div className='bg-mantle pb-8 scroll-mt-24 lg:scroll-mt-40' id='experience'>
-        <JobCard jobtitle={"Undergraduate Research"} time={"JAN 2025 - PRESENT"} />
-        <JobCard jobtitle={"Sunrise Coffee Co."} time={"2022 - 2024"} />
+        <JobCard 
+          jobtitle={"Undergraduate Research"} 
+          time={"JAN 2025 - PRESENT"} 
+          jobdesc={
+            <>
+              Conducted research under Dr. Yogesh Singh Rawat in computer vision. Evaluated AI models by using image captioning in order to optimize their ability to accurately interpret and describe visual data. Experiments were performed using images from the <a className="text-text" href="https://zeyofu.github.io/blink/" target="_blank" rel="noopener noreferrer">BLINK</a> dataset.
+            </>
+          } 
+        />
+
+      <JobCard 
+        jobtitle={"Sunrise Coffee Co."} 
+        time={"2022 - 2024"} 
+        jobdesc={
+          <>
+            Built strong communication and time management skills by handling multiple tasks in a fast-paced environment while keeping interactions with customers clear, friendly, and efficient.
+          </>
+        } 
+      />
       </div>
 
       <div className='bg-mantle py-8 space-y-3 scroll-mt-24 lg:scroll-mt-40' id='projects'>
-        <ProjectCard projecttitle={"Minecraft Discord Bot"} projectdesc={"A Discord bot for Minecraft server management."} imageSrc={project1Img} titleLink={"https://github.com/aavillanuevaa/minecraft-bot"} />
-        <ProjectCard projecttitle='Custom Chrome Extension' projectdesc='A Chrome extension for productivity.' imageSrc={project2Img} titleLink={"https://github.com/aavillanuevaa/new-tab-extension"} />
+        <ProjectCard projecttitle={"Minecraft Discord Bot"} projectdesc={"Manages and moderates a private Minecraft server giving simple access to commands and information."} imageSrc={project1Img} titleLink={"https://github.com/aavillanuevaa/minecraft-bot"} />
+        <ProjectCard projecttitle={"New Tab Chrome Extension"} projectdesc={"Overrides the default new tab page with a customizable dashboard designed for productivity."} imageSrc={project2Img} titleLink={"https://github.com/aavillanuevaa/new-tab-extension"} />
       </div>
 
       <div className='text-xs font-bold mt-auto pb-[6%] pt-[2%] text-subtext bg-mantle ml-[50%]'>
