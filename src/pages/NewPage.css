@@ -1,0 +1,592 @@
+.mc-page {
+  --sky-top: #5fb6ee;
+  --sky-mid: #bfe8fb;
+  --grass: #5b9a3b;
+  --grass-edge: #4c8730;
+  --dirt: #7c5330;
+  --dirt-dark: #5a3c22;
+  --stone: #9c9c9c;
+  --stone-dark: #6e6e6e;
+  --wood: #9c7a45;
+  --wood-dark: #7a5c33;
+  --ink: #2b2a1f;
+  --paper: #ede6d0;
+  --slot: #c6c6c6;
+  --slot-well: #8b8b8b;
+  --slot-hi: #ffffff;
+  --slot-lo: #373737;
+  --accent: #1f96a3;
+  --accent-2: #a13126;
+
+  background: var(--sky-mid);
+  color: var(--ink);
+  font-family: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  cursor: url("/New Piskel@2x.png") 16 16, crosshair;
+}
+/* belt-and-suspenders: cursor is inherited, so .mc-page above already
+   covers everything in it, but force it on every element too in case
+   anything (now or later) sets its own cursor -- this page should never
+   show a plain pointer/default cursor anywhere. */
+.mc-page * {
+  cursor: url("/New Piskel@2x.png") 16 16, crosshair;
+}
+
+.mc-page h1,
+.mc-page h2,
+.mc-pixel {
+  font-family: 'Pixelify Sans', 'IBM Plex Sans', monospace;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.mc-page a {
+  color: inherit;
+}
+
+.mc-eyebrow {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* ---------- scroll checkpoints ---------- */
+/* each full section (the hero + every .mc-section below) is a snap
+   point -- scrolling settles on the nearest one instead of stopping
+   partway through. Scoped to this page only via :has() so it doesn't
+   affect the old page. No animation here yet, just the snapping. */
+html:has(.mc-page),
+body:has(.mc-page) {
+  scroll-snap-type: y mandatory;
+}
+.mc-sky,
+.mc-section {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+/* ---------- sky hero ---------- */
+
+.mc-sky {
+  height: 88vh;
+  background: linear-gradient(
+    180deg,
+    var(--sky-top) 20%,
+    var(--sky-mid) 90%,
+    color-mix(in srgb, var(--sky-mid) 100%, var(--grass) 12%) 100%
+  );
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  padding: 0 1.5rem;
+}
+.mc-cloud {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 2px;
+  box-shadow:
+    14px 0 0 0 rgba(255, 255, 255, 0.85),
+    -14px 0 0 0 rgba(255, 255, 255, 0.85),
+    7px -9px 0 0 rgba(255, 255, 255, 0.85),
+    -7px -9px 0 0 rgba(255, 255, 255, 0.85);
+  /* transform (translateX) is set directly from JS on scroll, based on
+     each cloud's own drift speed -- see SkyHero.jsx */
+  will-change: transform;
+}
+
+.mc-sky h1 {
+  font-size: clamp(1.8rem, 5.5vw, 3.2rem);
+  margin: 0 0 0.6rem;
+  color: #ffffff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  text-wrap: balance;
+  position: relative;
+  z-index: 1;
+}
+.mc-sky .mc-tagline {
+  font-size: 0.95rem;
+  color: #ffffff;
+  opacity: 0.95;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  margin: 0;
+  max-width: 34ch;
+  position: relative;
+  z-index: 1;
+}
+.mc-hero-hint {
+  margin-top: 0.9rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.75;
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- scrolling ground background ---------- */
+
+/* the background biome image is stretched (object-fit: cover) across
+   this element's full height, top-aligned. Deliberately ONE shared
+   image + ONE viewport-relative container (not per-section slices --
+   that caused an earlier bug where each section computed its own cover
+   scale independently and the pixel-art zoom didn't match between
+   sections) and NOT locked to native pixel size (that broke on
+   different screens and was heavy enough on a 46-megapixel image to
+   make scrolling stutter badly). A fixed vh height here lets us
+   calculate exactly which section should start where in the image --
+   see the .mc-section--* min-heights below -- and that percentage-based
+   math scales correctly on any screen size since vh does too. */
+.mc-ground-wrap {
+  position: relative;
+  min-height: 500vh;
+}
+.mc-ground-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  image-rendering: pixelated;
+  z-index: 0;
+  display: block;
+}
+
+/* ---------- hotbar nav ---------- */
+
+.mc-hotbar {
+  position: fixed;
+  left: 50%;
+  bottom: 1.25rem;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  background: var(--slot-well);
+  padding: 6px;
+  border: 3px solid var(--slot-lo);
+  box-shadow: inset 0 0 0 2px var(--slot-hi), 0 6px 0 rgba(0, 0, 0, 0.35);
+  z-index: 20;
+}
+
+.mc-slot {
+  width: 56px;
+  height: 56px;
+  background: var(--slot);
+  border: none;
+  box-shadow: inset 2px 2px 0 var(--slot-hi), inset -2px -2px 0 var(--slot-lo);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0;
+}
+.mc-slot:hover,
+.mc-slot:focus-visible {
+  background: color-mix(in srgb, var(--slot) 80%, var(--accent));
+  outline: none;
+}
+.mc-icon-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 2.5px);
+  grid-template-rows: repeat(8, 2.5px);
+}
+.mc-icon-grid span {
+  width: 2.5px;
+  height: 2.5px;
+}
+.mc-slot-label {
+  position: absolute;
+  bottom: -1.4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  color: var(--ink);
+  opacity: 0.75;
+}
+
+/* ---------- ground content ---------- */
+
+.mc-ground {
+  position: relative;
+  z-index: 1;
+}
+
+/* .mc-section is the checkpoint/snap box ONLY -- its height (min-height,
+   set per section below) is what the scroll-snap math in the comment
+   below is built on. It stays position:relative and otherwise empty of
+   layout opinions so nothing you do to position text can ever change
+   where a section starts/ends. */
+.mc-section {
+  min-height: 100vh;
+  position: relative;
+}
+/* .mc-section-body is the actual text box -- position:absolute + inset:0
+   takes it out of the flow, so however you move it (justify-content,
+   padding, margin, transform, top/left, whatever) it can NEVER grow or
+   shrink the .mc-section box above it or shift a checkpoint. Adjust
+   content placement here / in the per-section overrides below it, never
+   on .mc-section itself. */
+.mc-section-body {
+  position: absolute;
+  inset: 0;
+  max-width: 760px;
+  margin: 0 auto;
+  /* clamp(min, preferred, max): shrinks toward min on short viewports
+     instead of forcing the content to overflow/scroll within the
+     section -- same idea on every clamp() below in this file */
+  padding: clamp(1.5rem, 5vh, 3.5rem) 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+/* About sits right at the top of the ground-wrap background, where the
+   grass band is -- pin its content to the top of the section (instead
+   of centering) so it lands on the grass, not the dirt further down */
+.mc-section--top .mc-section-body {
+  justify-content: flex-start;
+  padding-top: clamp(3rem, 12vh, 10rem);
+}
+
+/* Contact sits on the starry void band -- these sit behind .mc-section-body
+   (painted first, same stacking context, no z-index needed) and twinkle
+   independently so they read as ambient starlight rather than one
+   synchronized blink. */
+.mc-stars-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.mc-star {
+  position: absolute;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 4px 1px rgba(255, 255, 255, 0.7);
+  animation-name: mc-star-twinkle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+@keyframes mc-star-twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Projects sits on the nether/lava band -- warm glow dots that throb
+   slowly (a throb, not a twinkle) on top of it, same technique as the
+   stars above. */
+.mc-lava-glow-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.mc-lava-glow {
+  position: absolute;
+  background: #ffb347;
+  border-radius: 50%;
+  box-shadow: 0 0 6px 2px rgba(255, 110, 20, 0.8);
+  animation-name: mc-lava-throb;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+@keyframes mc-lava-throb {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
+}
+
+/* free-roaming ash/dust motes on top of the lava glows -- overflow:
+   hidden on the overlay keeps them wandering only within this section,
+   never drifting into About/Experience/Contact above or below it. */
+.mc-dust-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+/* .mc-dust-particle is the OUTER span -- its transform is written
+   directly by ProjectsSection's mouse-repulsion rAF loop (see the
+   component). .mc-dust-particle-inner is the visible dot and carries the
+   CSS ambient-drift keyframe. Both animate `transform`, but since one is
+   on the parent and one on the child, they compose instead of fighting
+   over the same property on the same element. */
+.mc-dust-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+}
+.mc-dust-particle-inner {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #d8b48a;
+  box-shadow: 0 0 3px 1px rgba(255, 150, 60, 0.5);
+  animation-name: mc-dust-drift;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+@keyframes mc-dust-drift {
+  /* starts and ends at the same transform+opacity so the infinite loop
+     doesn't visibly snap back to origin each cycle */
+  0% {
+    transform: translate(0, 0);
+    opacity: 0.2;
+  }
+  20% {
+    opacity: 0.75;
+  }
+  33% {
+    transform: translate(var(--dx1), var(--dy1));
+  }
+  55% {
+    opacity: 0.75;
+  }
+  66% {
+    transform: translate(var(--dx2), var(--dy2));
+  }
+  85% {
+    opacity: 0.75;
+  }
+  100% {
+    transform: translate(0, 0);
+    opacity: 0.2;
+  }
+}
+
+/* checkpoint zones -- each section's min-height is sized so the NEXT
+   section starts exactly on a biome boundary in the background image
+   (stretched across .mc-ground-wrap's 500vh -- vh, not px, so this
+   scales correctly on any screen size). Added 1 more block (24px,
+   block-aligned) of grass at the very top. site-bg-biomes-wide.png is
+   now 7680x6960: dirt/stone ~17.8%, end of the 1st bedrock line
+   ~54.5%, end of the 2nd bedrock line ~75.5% of the image height.
+   These three rules are the ONLY place checkpoint math lives --
+   content positioning (padding/justify-content/etc.) belongs on
+   .mc-section-body instead, see the rules above and below this block.
+     About:      0%    -> dirt/stone line (17.8% of 500vh)
+     Experience: 17.8% -> past the 1st bedrock line, so the next section
+                 opens on clean red (54.5%)
+     Projects:   54.5% -> past the 2nd bedrock line, so Contact opens on
+                 clean starry void (75.5%) */
+.mc-section--about {
+  min-height: 88.9vh;
+}
+.mc-section--experience {
+  min-height: 183.5vh;
+}
+.mc-section--projects {
+  min-height: 105.2vh;
+}
+.mc-section--projects .mc-section-body {
+  padding-top: 10rem;
+}
+.mc-section--contact {
+  min-height: 92vh;
+}
+.mc-section--experience .mc-section-body {
+  transform: translateY(-2rem);
+}
+/* Contact opens on the void band with the (now much bigger) end island
+   drawn in the lower half of that band -- push the content down so the
+   card reads as sitting on the island's flat top instead of floating in
+   empty space above it. */
+.mc-section--contact .mc-section-body {
+  justify-content: flex-end;
+  padding-bottom: clamp(4rem, 16vh, 12rem);
+}
+
+.mc-section-body > .mc-eyebrow,
+.mc-section-body > h2 {
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+}
+
+.mc-section h2 {
+  margin: 0 0 clamp(0.5rem, 1.5vh, 1rem);
+  font-size: clamp(1.05rem, 2.6vh, 1.4rem);
+}
+
+.mc-section p {
+  line-height: 1.65;
+  font-size: clamp(0.85rem, 1.6vh, 0.98rem);
+  margin: 0 0 clamp(0.5rem, 1.5vh, 0.9rem);
+}
+.mc-section p:last-child {
+  margin-bottom: 0;
+}
+
+.mc-item-frame {
+  border: 3px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.35);
+  padding: clamp(0.75rem, 2.5vh, 1.25rem) 1.4rem;
+  margin-top: clamp(0.5rem, 1.5vh, 1rem);
+  color: #ece7d6;
+}
+.mc-item-frame h3 {
+  margin: 0 0 0.3rem;
+  font-family: 'Pixelify Sans', monospace;
+  font-size: clamp(0.85rem, 2vh, 1rem);
+  color: #ffffff;
+}
+.mc-item-frame .mc-meta {
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffd28a;
+  font-weight: 600;
+}
+.mc-item-frame p {
+  margin-top: 0.5rem;
+  font-size: clamp(0.8rem, 1.6vh, 0.9rem);
+}
+.mc-bullets {
+  margin: 0.6rem 0 0;
+  padding-left: 1.1rem;
+  list-style: disc;
+}
+.mc-bullets li {
+  font-size: clamp(0.8rem, 1.6vh, 0.9rem);
+  line-height: 1.55;
+  margin-bottom: clamp(0.25rem, 1vh, 0.45rem);
+}
+.mc-bullets li:last-child {
+  margin-bottom: 0;
+}
+.mc-item-frame a {
+  color: #8fe3ea;
+  text-decoration: underline;
+}
+/* the GitHub/LinkedIn buttons in Contact are .mc-pixel-btn anchors that
+   happen to sit inside .mc-item-frame (for the glass background) -- the
+   rule above is meant for plain prose links, not buttons, and its higher
+   specificity (class+tag beats .mc-pixel-btn's single class) was winning
+   and turning them cyan/underlined instead of matching the button style. */
+.mc-item-frame a.mc-pixel-btn {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.mc-carousel {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+.mc-carousel-viewport {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+.mc-carousel-track {
+  display: flex;
+  transition: transform 0.4s ease;
+}
+.mc-carousel-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+}
+.mc-carousel-slide .mc-item-frame {
+  margin-top: 0;
+}
+.mc-carousel-arrow {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  background: var(--slot);
+  border: none;
+  box-shadow: inset 2px 2px 0 var(--slot-hi), inset -2px -2px 0 var(--slot-lo);
+  color: var(--ink);
+  font-size: 1.3rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.mc-carousel-arrow:hover,
+.mc-carousel-arrow:focus-visible {
+  background: color-mix(in srgb, var(--slot) 80%, var(--accent));
+  outline: none;
+}
+.mc-carousel-arrow:active {
+  box-shadow: inset -2px -2px 0 var(--slot-hi), inset 2px 2px 0 var(--slot-lo);
+}
+.mc-carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+.mc-carousel-dot {
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border: none;
+  background: rgba(255, 255, 255, 0.25);
+}
+.mc-carousel-dot.is-active {
+  background: var(--accent);
+}
+
+.mc-contact-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+.mc-pixel-btn {
+  font-family: 'Pixelify Sans', monospace;
+  font-size: 0.85rem;
+  background: var(--slot);
+  border: none;
+  box-shadow: inset 2px 2px 0 var(--slot-hi), inset -2px -2px 0 var(--slot-lo);
+  padding: 0.6rem 1rem;
+  color: var(--ink);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+.mc-pixel-btn:active {
+  box-shadow: inset -2px -2px 0 var(--slot-hi), inset 2px 2px 0 var(--slot-lo);
+}
+/* sits directly on the dark starry-void background now (not the page's
+   light background), so it needs light text, not --ink */
+.mc-footer {
+  text-align: center;
+  /* scroll-snap-align: end (below) pins the BOTTOM of this box to the
+     viewport bottom, so it's the bottom padding that pushes the link
+     itself up away from the edge -- raised from 7rem to move it up. */
+  padding: 2rem 1.5rem 11rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.65);
+  /* mandatory scroll-snap only knows about .mc-sky/.mc-section as valid
+     resting points -- without the footer also being one, there's nowhere
+     for the browser to "land" past Contact, so it snaps back up instead
+     of letting you reach the true bottom of the page. */
+  scroll-snap-align: end;
+}
+.mc-footer a {
+  color: #ffffff;
+  text-decoration: underline;
+}
